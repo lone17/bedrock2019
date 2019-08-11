@@ -156,12 +156,12 @@ def split_fields(page, np_img):
                 fields.append({'key': key,
                                'key_pos': [x0, y0, field_pos[0], y1],
                                'field_pos': field_pos,
-                               'type': '_'.append('text', str(num_lines))})
+                               'type': '_'.join('text', str(num_lines))})
                 remain = False
             else:
                 num_lines = (y1 - y0) // 25
                 fields.append({'field_pos': [x0, y0, x1, y1], 
-                               'type': '_'.append('text', str(num_lines))})
+                               'type': '_'.join('text', str(num_lines))})
                 remain = False
         elif bool(re.search(checkbox, text['value'])):
             # print(text['value'])
@@ -273,7 +273,7 @@ def detect_table_cells(page, np_img):
                 if 3 * (cell[2] - cell[0]) > (cell[3] - cell[1]):
                     num_lines = (cell[3] - cell[1]) // 25
                     fields.append({'field_pos': field_pos, 
-                                   'type': '_'.append('text', str(num_lines))})
+                                   'type': '_'.join('text', str(num_lines))})
                 
     # print(len(fields))
     return fields
