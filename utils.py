@@ -135,7 +135,7 @@ def split_fields(page, np_img):
               'value': text['text']} 
              for text in texts if text['bottom'] / pdf_h < 0.90]
     
-    checkbox = r'☐'
+    checkbox = r'☐|'
     dash = '_'
 
     remaining_texts = []
@@ -163,9 +163,9 @@ def split_fields(page, np_img):
                 fields.append({'field_pos': [x0, y0, x1, y1], 
                                'type': '_'.join(['text', str(num_lines)])})
                 remain = False
-        elif bool(re.search(checkbox, text['value'])):
+        elif bool(re.search(checkbox, text['value'])) or text['value'].strip() == 'o':
             # print(text['value'])
-            key = re.sub(checkbox, '', text['value']).strip()
+            key = re.sub(checkbox, '', text['value']).replace('o', '').strip()
             if key != '':
                 squares = detect_squares(np_img[y0:y1, x0:x1])
                 if len(squares) == 1:
