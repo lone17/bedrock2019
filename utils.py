@@ -152,16 +152,16 @@ def split_fields(page, np_img):
             if key != '':
                 line = detect_dashes(np_img[y0:y1, x0:x1])
                 field_pos = [line[0] + x0, y0, line[2] + x0, y1] 
-                num_lines = (y1 - y0) // 25
+                num_lines = max((y1 - y0) // 25, 1)
                 fields.append({'key': key,
                                'key_pos': [x0, y0, field_pos[0], y1],
                                'field_pos': field_pos,
-                               'type': '_'.join('text', str(num_lines))})
+                               'type': '_'.join(['text', str(num_lines)])})
                 remain = False
             else:
-                num_lines = (y1 - y0) // 25
+                num_lines = max((y1 - y0) // 25, 1)
                 fields.append({'field_pos': [x0, y0, x1, y1], 
-                               'type': '_'.join('text', str(num_lines))})
+                               'type': '_'.join(['text', str(num_lines)])})
                 remain = False
         elif bool(re.search(checkbox, text['value'])):
             # print(text['value'])
@@ -229,11 +229,11 @@ def detect_squares(img):
     
     # cv2.drawContours(img, squares, -1, (0, 255, 0), 3 )
     # print(squares)
-    for box in squares:
-        print(box)
-        cv2.rectangle(img, tuple(box[:2]), tuple(box[2:]), (255,0,0), 1)
-    plt.imshow(img)
-    plt.show()
+    # for box in squares:
+    #     print(box)
+    #     cv2.rectangle(img, tuple(box[:2]), tuple(box[2:]), (255,0,0), 1)
+    # plt.imshow(img)
+    # plt.show()
     # if len(squares) > 1:
     #     return squares[1:]
     return squares
@@ -271,9 +271,9 @@ def detect_table_cells(page, np_img):
                              ]
                 # print(field_pos)
                 if 3 * (cell[2] - cell[0]) > (cell[3] - cell[1]):
-                    num_lines = (cell[3] - cell[1]) // 25
+                    num_lines = max((cell[3] - cell[1]) // 25, 1)
                     fields.append({'field_pos': field_pos, 
-                                   'type': '_'.join('text', str(num_lines))})
+                                   'type': '_'.join(['text', str(num_lines)])})
                 
     # print(len(fields))
     return fields
