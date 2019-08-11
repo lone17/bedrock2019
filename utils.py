@@ -210,8 +210,8 @@ def detect_squares(img):
                 bin = cv2.dilate(bin, None)
             else:
                 _retval, bin = cv2.threshold(gray, thrs, 255, cv2.THRESH_BINARY)
-            bin, contours, _hierarchy = \
-                cv2.findContours(bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours, _hierarchy = \
+                cv2.findContours(bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
             for cnt in contours[1:]:
                 cnt_len = cv2.arcLength(cnt, True)
                 cnt = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
@@ -283,15 +283,20 @@ def format_fields(fields, np_img):
     formatted = []
     for f in fields:
         x0, y0, x1, y1 = f['field_pos']
+        key_pos = f.get('key_pos', None)
+        key_pos[0] = float(key_pos[0] / imgw)
+        key_pos[1] = float(key_pos[1] / imgh)
+        key_pos[3] = float(key_pos[2] / imgw)
+        key_pos[3] = float(key_pos[3] / imgh)
         item = {
-            'x0': x0 / img_w,
-            'x1': x1 / img_w,
-            'y0': y0 / img_h,
-            'y1': y1 / img_h,
+            'x0': float(x0 / img_w),
+            'x1': float(x1 / img_w),
+            'y0': float(y0 / img_h),
+            'y1': float(y1 / img_h),
             'type': f['type'],
             'key': {
                    'name': f.get('key', None),
-                   'pos': f.get('key_pos', None),
+                   'pos': key_pos,
             }
         }
         formatted.append(item)
