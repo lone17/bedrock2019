@@ -133,7 +133,7 @@ def split_fields(page, np_img):
               'y0': int(text['top'] / pdf_h * img_h),
               'y1': int(text['bottom'] / pdf_h * img_h),
               'value': text['text']} 
-             for text in texts if text['top'] / pdf_h < 0.9]
+             for text in texts if text['bottom'] / pdf_h < 0.90]
     
     checkbox = r'☐'
     dash = '_'
@@ -152,14 +152,16 @@ def split_fields(page, np_img):
             if key != '':
                 line = detect_dashes(np_img[y0:y1, x0:x1])
                 field_pos = [line[0] + x0, y0, line[2] + x0, y1] 
+                num_lines = (y1 - y0) // 25
                 fields.append({'key': key,
                                'key_pos': [x0, y0, field_pos[0], y1],
                                'field_pos': field_pos,
-                               'type': 'string'})
+                               'type': '_'.append('text', str(num_lines))})
                 remain = False
             else:
-                fields.append({'field_pos': [x0, y0, x1, y1],
-                               'type': 'string'})
+                num_lines = (y1 - y0) // 25
+                fields.append({'field_pos': [x0, y0, x1, y1], 
+                               'type': '_'.append('text', str(num_lines))})
                 remain = False
         elif bool(re.search(checkbox, text['value'])):
             # print(text['value'])
@@ -227,11 +229,11 @@ def detect_squares(img):
     
     # cv2.drawContours(img, squares, -1, (0, 255, 0), 3 )
     # print(squares)
-    # for box in squares:
-    #     print(box)
-    #     cv2.rectangle(img, tuple(box[:2]), tuple(box[2:]), (255,0,0), 1)
-    # plt.imshow(img)
-    # plt.show()
+    for box in squares:
+        print(box)
+        cv2.rectangle(img, tuple(box[:2]), tuple(box[2:]), (255,0,0), 1)
+    plt.imshow(img)
+    plt.show()
     # if len(squares) > 1:
     #     return squares[1:]
     return squares
@@ -246,18 +248,18 @@ def detect_table_cells(page, np_img):
     table_settings = {
         'horizontal_strategy': 'lines',
         'vertical_strategy': 'lines',
-        'edge_min_length': 100,
-        'intersection_tolerance': 1,
-        # 'text_y_tolerance':5,
-        # 'text_x_tolerance': 5,
-        'snap_tolerance': 7,
+        'edge_min_length': 50,
+        'intersection_tolerance': 5,
+        # 'text_y_tolerance':0,
+        # 'text_x_tolerance': 0,
+        'snap_tolerance': 3,
         'join_tolerance': 3,
     }
     for table in page.find_tables(table_settings):
         # print(table.bbox)
         _, _, table_w, table_h = table.bbox
         for cell in table.cells:
-            texts = page.within_bbox(cell).extract_words()
+            texts = page.crop(cell).extract_words()
             # print(texts)
             if len(texts) == 0:
                 # print('\t', cell)
@@ -268,7 +270,10 @@ def detect_table_cells(page, np_img):
                              int(cell[3] / pdf_h * img_h),
                              ]
                 # print(field_pos)
-                fields.append({'field_pos': field_pos, 'type': 'string'})
+                if 3 * (cell[2] - cell[0]) > (cell[3] - cell[1]):
+                    num_lines = (cell[3] - cell[1]) // 25
+                    fields.append({'field_pos': field_pos, 
+                                   'type': '_'.append('text', str(num_lines))})
                 
     # print(len(fields))
     return fields
